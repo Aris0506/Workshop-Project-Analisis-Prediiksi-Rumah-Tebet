@@ -1,3 +1,4 @@
+import sklearn
 from sklearn.pipeline import Pipeline
 import streamlit as st
 import pandas as pd
