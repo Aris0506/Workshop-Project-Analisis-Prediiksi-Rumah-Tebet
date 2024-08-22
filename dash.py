@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler, PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde       
 
 # Load dataset
 tebet_df = pd.read_excel('dataset/DATA RUMAH TEBET.xlsx')
