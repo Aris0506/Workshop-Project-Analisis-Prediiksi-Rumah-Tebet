@@ -57,45 +57,60 @@ fig_density.update_layout(title=' Plot Density  dan sebaran HARGA ', xaxis_title
 
 st.plotly_chart(fig_density)
 
+def get_features():
+    return ['HARGA', 'LB', 'LT', 'KT', 'KM', 'GRS']
+
 # Membuat histogram
-fig = make_subplots(rows=2, cols=3, 
-                    subplot_titles=['Distribusi HARGA', 'Distribusi Luas Bangunan', 'Distribusi Luas Tanah', 
-                                    'Distribusi Kamar Tidur', 'Distribusi Kamar Mandi', 'Distribusi Garasi'])
+def create_histograms(df, features):
+    fig = make_subplots(rows=3, cols=2, 
+                        subplot_titles=[f'Distribusi{feature}' for feature in features])
 
-# Daftar fitur
-features = ['HARGA', 'LB', 'LT', 'KT', 'KM', 'GRS']
+    
 
-# Menambahkan histogram ke subplot
-for i, feature in enumerate(features):
-    row = i // 3 + 1  # Menentukan baris
-    col = i % 3 + 1   # Menentukan kolom
-    histogram = go.Histogram(x=tebet_df[feature], nbinsx=15, name=feature)
-    fig.add_trace(histogram, row=row, col=col)
+    # Menambahkan histogram ke subplot
+    for i, feature in enumerate(features):
+        row = i // 2 + 1  # Menentukan baris
+        col = i % 2 + 1   # Menentukan kolom
+        histogram = go.Histogram(x=tebet_df[feature], nbinsx=15, name=feature)
+        fig.add_trace(histogram, row=row, col=col)
 
-# Memperbarui layout
-fig.update_layout(height=600, width=1300, title_text="Distribusi Fitur",
-                  showlegend=False)
+    # Memperbarui layout
+    fig.update_layout(height=600, width=1300, title_text="Distribusi Fitur",
+                    showlegend=False)
+    return fig
 
-# Menampilkan figure
-st.plotly_chart(fig)
+ 
+# Mendapatkan daftar features
+features = get_features()
+
+# Membuat dan menampilkan histogram
+fig_histogram = create_histograms(tebet_df, features)
+st.plotly_chart(fig_histogram)
+
 
 # Membuat box plot
-fig = make_subplots(rows=2, cols=3, 
-                    subplot_titles=[f'Plot {feature}' for feature in features])
+def create_box_plots(df, features):
+    fig = make_subplots(rows=3, cols=2, 
+                        subplot_titles=[f'Plot {feature}' for feature in features])
 
-# Menambahkan box plot ke subplot
-for i, feature in enumerate(features):
-    row = i // 3 + 1  # Menentukan baris
-    col = i % 3 + 1   # Menentukan kolom
-    box_plot = go.Box(y=tebet_df[feature], name=feature)
-    fig.add_trace(box_plot, row=row, col=col)
+    # Menambahkan box plot ke subplot
+    for i, feature in enumerate(features):
+        row = i // 2 + 1  # Menentukan baris
+        col = i % 2 + 1   # Menentukan kolom
+        box_plot = go.Box(y=tebet_df[feature], name=feature)
+        fig.add_trace(box_plot, row=row, col=col)
 
-# Memperbarui layout
-fig.update_layout(height=900, width=1400, title_text="Distribusi Box Plot Fitur",
-                  showlegend=False)
+    # Memperbarui layout
+    fig.update_layout(height=900, width=1400, title_text="Distribusi Box Plot Fitur",
+                    showlegend=False)
+    return fig
 
-# Menampilkan figure
-st.plotly_chart(fig)
+# Mendapatkan daftar features
+features = get_features()
+# Membuat dan menampilkan box plot
+fig_boxplot = create_box_plots(tebet_df, features)
+st.plotly_chart(fig_boxplot)
+
 
 # Menghitung korelasi antara setiap fitur dan target 'HARGA'
 correlation_with_target = tebet_df[features].corrwith(tebet_df['HARGA'])
