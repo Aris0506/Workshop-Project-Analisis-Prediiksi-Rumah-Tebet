@@ -17,7 +17,7 @@ tebet_df = pd.read_excel('dataset/DATA RUMAH TEBET.xlsx')
 
 ###################################################################
 # 1. Pengantar
-st.title('Laporan Analisis Prediksi Rumah Di Tebet dengan menggunakan Model Polynomial Regression')
+st.title('Laporan Analisis Prediksi Rumah Di Tebet dengan menggunakan Model Polynomial Regression', layout='wide')
 
 st.subheader('1. Pengantar')
 st.markdown("""
@@ -43,7 +43,7 @@ st.markdown("""
 
 st.markdown("**Deskripsi Data:**")
 st.text(tebet_df.describe().to_string())
-
+##############
 # Create KDE plot
 x = tebet_df['HARGA']
 kde = gaussian_kde(x, bw_method=0.5)
@@ -56,7 +56,7 @@ fig_density.add_trace(go.Histogram(x=x, histnorm='probability density', nbinsx=5
 fig_density.update_layout(title=' Plot Density  dan sebaran HARGA ', xaxis_title='HARGA', yaxis_title='Density', showlegend=True, bargap=0.1)
 
 st.plotly_chart(fig_density)
-
+##############
 def get_features():
     return ['HARGA', 'LB', 'LT', 'KT', 'KM', 'GRS']
 
@@ -110,45 +110,67 @@ features = get_features()
 # Membuat dan menampilkan box plot
 fig_boxplot = create_box_plots(tebet_df, features)
 st.plotly_chart(fig_boxplot)
+##############
+#Menghitung korelasi antara setiap fitur dan target 'HARGA'
+def correlation_with_target(df, features, target='HARGA'):
+    return tebet_df[features].corrwith(tebet_df['HARGA'])
 
 
-# Menghitung korelasi antara setiap fitur dan target 'HARGA'
-correlation_with_target = tebet_df[features].corrwith(tebet_df['HARGA'])
+def create_correlation_heatmap(df, features, target='HARGA'):
+    # Menghitung korelasi
+    correlation_values = correlation_with_target(df, features, target)
 
-# Mengonversi hasil ke DataFrame untuk keperluan visualisasi
-correlation_df = pd.DataFrame(correlation_with_target, columns=['Korelasi']).reset_index()
-correlation_df.rename(columns={'index': 'Fitur'}, inplace=True)
+    # Mengonversi hasil ke DataFrame untuk keperluan visualisasi
+    correlation_df = pd.DataFrame(correlation_values, columns=['Korelasi']).reset_index()
+    correlation_df.rename(columns={'index': 'Fitur'}, inplace=True)
 
-# Membuat heatmap untuk visualisasi korelasi
-fig = go.Figure(data=go.Heatmap(
-    z=correlation_df['Korelasi'].values.reshape(1, -1),  # Mengubah ke bentuk 2D untuk heatmap
-    x=correlation_df['Fitur'],
-    y=['HARGA'],  # Target sebagai label pada sumbu y
-    colorscale='Viridis',
-    colorbar=dict(title='Nilai Korelasi', ticksuffix='%'),
-    zmin=-1, zmax=1
-))
+    # Membuat heatmap untuk visualisasi korelasi
+    fig = go.Figure(data=go.Heatmap(
+        z=correlation_df['Korelasi'].values.reshape(1, -1),  # Mengubah ke bentuk 2D untuk heatmap
+        x=correlation_df['Fitur'],
+        y=['HARGA'],  # Target sebagai label pada sumbu y
+        colorscale='Viridis',
+        colorbar=dict(title='Nilai Korelasi', ticksuffix='%'),
+        zmin=-1, zmax=1
+    ))
 
-# Memperbarui layout
-fig.update_layout(
-    title='Korelasi Fitur dengan HARGA',
-    xaxis_title='Fitur',
-    yaxis_title='Target',
-    xaxis=dict(tickmode='linear'),
-    yaxis=dict(tickmode='linear')
-)
+    # Memperbarui layout
+    fig.update_layout(
+        title=f'Korelasi Fitur dengan {target}',
+        xaxis_title='Fitur',
+        yaxis_title='Target',
+        xaxis=dict(tickmode='linear'),
+        yaxis=dict(tickmode='linear')
+    )
 
-# Menampilkan plot
-st.plotly_chart(fig)
+    return fig
 
-# Menghitung korelasi antara fitur-fitur dan target
-correlation_with_target = tebet_df[features].corrwith(tebet_df['HARGA'])
+features = get_features()  # Mengambil fitur dari fungsi sebelumnya
+fig_correlation = create_correlation_heatmap(tebet_df, features)
+st.plotly_chart(fig_correlation)
 
-# Membuat bar plot dengan Plotly
-fig = px.bar(x=correlation_with_target.index, y=correlation_with_target.values,
-             labels={'x': 'Fitur', 'y': 'Korelasi'})
-fig.update_layout(xaxis_title='Fitur', yaxis_title='Korelasi')
-st.plotly_chart(fig)
+
+def create_correlation_bar(df, features, target='HARGA'):
+    # Menghitung korelasi antara fitur-fitur dan target
+    correlation_values = correlation_with_target(df, features, target)
+
+
+    # Mengonversi hasil ke DataFrame untuk keperluan visualisasi
+    correlation_df = pd.DataFrame(correlation_values, columns=['Korelasi']).reset_index()
+    correlation_df.rename(columns={'index': 'Fitur'}, inplace=True)
+
+     # Membuat bar plot dengan Plotly
+    fig = px.bar(correlation_df, x='Fitur', y='Korelasi',
+                 labels={'Fitur': 'Fitur', 'Korelasi': 'Korelasi'},
+                 title='Korelasi Fitur dengan ' + target)
+    fig.update_layout(yaxis_title='Korelasi', xaxis_title='Fitur')
+    return fig
+
+# Mengambil daftar features
+features = get_features()  # Mengambil fitur dari fungsi sebelumnya
+# Membuat dan menampilkan bar plot korelasi
+fig_correlation_bar = create_correlation_bar(tebet_df, features)
+st.plotly_chart(fig_correlation_bar)
 
 ##################################################################
 # 3. Metodologi
