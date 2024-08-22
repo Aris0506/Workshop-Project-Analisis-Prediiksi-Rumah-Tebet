@@ -232,8 +232,7 @@ st.markdown("---")
 
 ##################################################################
 # 5. Input Prediksi
-st.subheader('5. Input Fitur untuk Prediksi Harga')
-
+# Sidebar for feature input
 st.sidebar.header('Masukkan Fitur untuk Prediksi Harga')
 slider_lb = st.sidebar.slider('Luas Bangunan (LB)', 
                                min_value=float(tebet_df['LB'].min()), 
@@ -247,7 +246,7 @@ slider_kt = st.sidebar.slider('Jumlah Kamar Tidur (KT)',
                                min_value=int(tebet_df['KT'].min()), 
                                max_value=int(tebet_df['KT'].max()), 
                                value=2, step=1)
-slider_km = st.sidebar.slider('Jumlah Kamar Mandi (KM)', 
+slider_km = st.sidebar.slider('Jumlah Kamar Mandi (KM)',   
                                min_value=int(tebet_df['KM'].min()), 
                                max_value=int(tebet_df['KM'].max()), 
                                value=1, step=1)
@@ -258,12 +257,19 @@ slider_grs = st.sidebar.slider('Jumlah Garasi (GRS)',
 
 # Function to predict price
 def predict_house_price(lb, lt, kt, km, grs):
-    features = np.array([[lb, lt, kt, km, grs]])
+    # Create a DataFrame with the input features
+    features = pd.DataFrame({
+        'LB': [lb],
+        'LT': [lt],
+        'KT': [kt],
+        'KM': [km],
+        'GRS': [grs]
+    })
     features_scaled = scaler.transform(features)  # Scaling features
     predicted_price = model.predict(features_scaled)
     return predicted_price[0]
 
-# Prediksi harga berdasarkan input
+# Predict price based on input
 if st.sidebar.button('Prediksi Harga'):
     predicted_price = predict_house_price(slider_lb, slider_lt, slider_kt, slider_km, slider_grs)
     st.write(f"Harga rumah impian Anda diperkirakan sekitar IDR {predicted_price:,.2f}")
